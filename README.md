@@ -1,43 +1,74 @@
 # Multi-Config
 
-This is a minimal Maven multi-module project with the following modules:
+Minimal Maven **multi-module** project (JDK **17**) with:
 
-- **common**: Provides shared utilities.
-- **domain**: Represents domain-specific logic.
-- **service**: Aggregates `common` and `domain` modules.
-- **web**: Entry point module that depends on `service`.
+- **common** — shared utilities  
+- **domain** — domain model / logic  
+- **service** — depends on `common` and `domain`  
+- **web** — entry point depending on `service`
 
-## Building
+## Build
 
-From the root directory, run:
-
-```bash
-mvn clean install
-```
-
-This will build and install all modules into the local Maven repository.
-
-## Running
-
-After building, you can run the `web` module application. Use one of the following methods:
-
-### Using Maven Exec Plugin
+From the repository root:
 
 ```bash
-mvn -pl web exec:java -Dexec.mainClass="com.example.web.WebApp"
+mvn clean verify
 ```
 
-> Note: You may need to add the Maven Exec Plugin to the `web/pom.xml` if it is not already configured.
+- JUnit 5 (junit-bom 5.13.4), Surefire (3.5.3), and JaCoCo (0.8.13) are preconfigured.
 
-### Using Java Command
+- Per-module coverage reports:
+  - `<module>/target/site/jacoco/index.html`
+- Aggregated coverage (all modules):
+  - `target/site/jacoco-aggregate/index.html`
 
-On Windows:
+> Compiler target is set via maven.compiler.release=17.
 
-```bat
-java -cp common/target/common-1.0-SNAPSHOT.jar;domain/target/domain-1.0-SNAPSHOT.jar;service/target/service-1.0-SNAPSHOT.jar;web/target/web-1.0-SNAPSHOT.jar com.example.web.WebApp
+## Profiles & Database
+
+Profiles are defined in the parent POM:
+
+- dev (active by default) — uses H2 in-memory for local development
+- ci — reads DB URL from environment: db.connectionString = ${env.DB_URL}
+- prod — same as ci (override with your production URL)
+
+Switch profiles as needed:
+
+```bash
+# default (dev): H2 in-memory
+mvn clean verify
+
+# CI build (expects DB_URL env var)
+DB_URL="jdbc:postgresql://db:5432/app" mvn -Pci clean verify
+
+# Production-like build
+DB_URL="jdbc:postgresql://prod-db:5432/app" mvn -Pprod clean verify
 ```
 
-On Unix/macOS:
+## Run the web module
+
+### Using Maven Exec Plugin (recommended)
+
+```bash
+mvn -pl web exec:java "-Dexec.mainClass=com.example.web.WebApp"
+```
+
+### Using java directly
+
+Windows:
+
+```bash
+java -cp common\target\common-1.0-SNAPSHOT.jar;domain\target\domain-1.0-SNAPSHOT.jar;service\target\service-1.0-SNAPSHOT.jar;web\target\web-1.0-SNAPSHOT.jar com.example.web.WebApp
+```
+
+Unix/macOS:
 
 ```bash
 java -cp common/target/common-1.0-SNAPSHOT.jar:domain/target/domain-1.0-SNAPSHOT.jar:service/target/service-1.0-SNAPSHOT.jar:web/target/web-1.0-SNAPSHOT.jar com.example.web.WebApp
+```
+
+---
+
+#### Note
+
+JaCoCo agent is wired via prepare-agent; HTML coverage is produced on verify.
