@@ -15,7 +15,7 @@ From the repository root:
 mvn clean verify
 ```
 
-- JUnit 5 (junit-bom 5.13.4), Surefire (3.5.3), and JaCoCo (0.8.13) are preconfigured.
+- JUnit 5 (junit-bom), Surefire, and JaCoCo are preconfigured.
 
 - Per-module coverage reports:
   - `<module>/target/site/jacoco/index.html`
