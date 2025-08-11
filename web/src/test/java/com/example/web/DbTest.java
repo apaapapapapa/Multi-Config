@@ -12,7 +12,7 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class H2DbTest {
+class DbTest {
 
     @Test
     void testH2InMemoryDb() throws Exception {
